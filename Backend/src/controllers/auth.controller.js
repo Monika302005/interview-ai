@@ -43,10 +43,10 @@ async function registerUserController(req, res) {
     )
 
     res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-})
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    })
 
 
     res.status(201).json({
@@ -93,10 +93,10 @@ async function loginUserController(req, res) {
     )
 
     res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-})
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    })
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
@@ -120,7 +120,11 @@ async function logoutUserController(req, res) {
         await tokenBlacklistModel.create({ token })
     }
 
-    res.clearCookie("token")
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    })
 
     res.status(200).json({
         message: "User logged out successfully"

@@ -13,8 +13,12 @@ const Register = () => {
     
     const handleSubmit = async (e) => {
         e.preventDefault()
-        await handleRegister({username,email,password})
-        navigate("/")
+        const success = await handleRegister({username,email,password})
+        if (success) {
+            navigate("/")
+        } else {
+            alert("Registration failed. Please make sure your server is running and the username/email is not already taken.")
+        }
     }
 
     if(loading){

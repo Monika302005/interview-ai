@@ -17,17 +17,19 @@ export const useInterview = () => {
 
     const generateReport = async ({ jobDescription, selfDescription, resumeFile }) => {
         setLoading(true)
-        let response = null
         try {
-            response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
-            setReport(response.interviewReport)
+            const response = await generateInterviewReport({ jobDescription, selfDescription, resumeFile })
+            if (response && response.interviewReport) {
+                setReport(response.interviewReport)
+                return response.interviewReport
+            }
         } catch (error) {
-            console.log(error)
+            console.error("Error in generateReport:", error)
         } finally {
             setLoading(false)
         }
 
-        return response.interviewReport
+        return null
     }
 
     const getReportById = async (interviewId) => {
@@ -35,13 +37,15 @@ export const useInterview = () => {
         let response = null
         try {
             response = await getInterviewReportById(interviewId)
-            setReport(response.interviewReport)
+            if (response && response.interviewReport) {
+                setReport(response.interviewReport)
+            }
         } catch (error) {
             console.log(error)
         } finally {
             setLoading(false)
         }
-        return response.interviewReport
+        return response ? response.interviewReport : null
     }
 
     const getReports = async () => {
@@ -49,14 +53,16 @@ export const useInterview = () => {
         let response = null
         try {
             response = await getAllInterviewReports()
-            setReports(response.interviewReports)
+            if (response && response.interviewReports) {
+                setReports(response.interviewReports)
+            }
         } catch (error) {
             console.log(error)
         } finally {
             setLoading(false)
         }
 
-        return response.interviewReports
+        return response ? response.interviewReports : []
     }
 
     const getResumePdf = async (interviewReportId) => {

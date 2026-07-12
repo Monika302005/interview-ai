@@ -9,12 +9,29 @@ const Home = () => {
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
     const [ resumeFile, setResumeFile ] = useState(null)
+    const [ validationError, setValidationError ] = useState("")
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
+        setValidationError("")
+
+        if (!jobDescription || !jobDescription.trim()) {
+            setValidationError("Target job description is required.")
+            return
+        }
+
+        if (!resumeFile && (!selfDescription || !selfDescription.trim())) {
+            setValidationError("Either a resume upload or a self description is required.")
+            return
+        }
+
         const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+        if (data && data._id) {
+            navigate(`/interview/${data._id}`)
+        } else {
+            alert("Failed to generate interview strategy. Please verify your backend server is running and your API keys are configured correctly.")
+        }
     }
 
     if (loading) {
@@ -52,8 +69,9 @@ const Home = () => {
                             className='panel__textarea'
                             placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
                             maxLength={5000}
+                            value={jobDescription}
                         />
-                        <div className='char-counter'>0 / 5000 chars</div>
+                        <div className='char-counter'>{jobDescription.length} / 5000 chars</div>
                     </div>
 
                     {/* Vertical Divider */}
@@ -76,7 +94,7 @@ const Home = () => {
                             </label>
                             <label className={`dropzone ${resumeFile ? 'dropzone--selected' : ''}`} htmlFor='resume'>
                                 {resumeFile ? (
-                                    <>
+                                     <>
                                         <span className='dropzone__icon dropzone__icon--success'>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><line x1="9" y1="19" x2="15" y2="19"></line><line x1="9" y1="11" x2="11" y2="11"></line></svg>
                                         </span>
@@ -106,6 +124,7 @@ const Home = () => {
                                 onChange={(e) => { setSelfDescription(e.target.value) }}
                                 id='selfDescription'
                                 name='selfDescription'
+                                value={selfDescription}
                                 className='panel__textarea panel__textarea--short'
                                 placeholder="Briefly describe your experience, key skills, and years of experience if you don't have a resume handy..."
                             />
@@ -120,6 +139,13 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Validation Error Message */}
+                {validationError && (
+                    <div className='validation-error-banner' style={{ padding: '0.8rem 1.5rem', margin: '0 1.5rem', background: 'rgba(255, 74, 74, 0.15)', border: '1px solid #ff4a4a', borderRadius: '8px', color: '#ff7373', fontSize: '0.9rem', fontWeight: '500' }}>
+                        {validationError}
+                    </div>
+                )}
 
                 {/* Card Footer */}
                 <div className='interview-card__footer'>

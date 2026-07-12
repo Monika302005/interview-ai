@@ -4,7 +4,7 @@ const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 
 const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
+    apiKey: process.env.GOOGLE_GENAI_API_KEY || process.env.GEMINI_API_KEY
 })
 
 
@@ -60,13 +60,18 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 async function generatePdfFromHtml(htmlContent) {
     let browser;
     try {
-        browser = await puppeteer.launch();
+        browser = await puppeteer.launch({
+            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        });
     } catch (e) {
         console.warn("Default Puppeteer launch failed. Attempting fallback to system Google Chrome...", e.message);
         const fs = require("fs");
         const systemChromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
         if (fs.existsSync(systemChromePath)) {
-            browser = await puppeteer.launch({ executablePath: systemChromePath });
+            browser = await puppeteer.launch({
+                executablePath: systemChromePath,
+                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            });
         } else {
             throw e;
         }

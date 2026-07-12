@@ -2,9 +2,9 @@ import axios from "axios"
 
 
 const api = axios.create({
-    baseURL: "https://interview-ai-063i.onrender.com",
-    withCredentials: true
-})
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+    withCredentials: true,
+});
 
 export async function register({ username, email, password }) {
 

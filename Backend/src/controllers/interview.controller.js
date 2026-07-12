@@ -10,14 +10,33 @@ const interviewReportModel = require("../models/interviewReport.model")
  */
 async function generateInterViewReportController(req, res) {
     try {
-        let resumeText = "";
-        if (req.file) {
-            const parser = new pdfParse.PDFParse({ data: req.file.buffer });
-            const resumeContent = await parser.getText();
-            resumeText = resumeContent.text || "";
+        const { selfDescription, jobDescription } = req.body;
+
+        if (!jobDescription || !jobDescription.trim()) {
+            return res.status(400).json({
+                message: "Job description is required."
+            });
         }
 
-        const { selfDescription, jobDescription } = req.body;
+        let resumeText = "";
+        if (req.file) {
+            try {
+                const parser = new pdfParse.PDFParse({ data: req.file.buffer });
+                const resumeContent = await parser.getText();
+                resumeText = resumeContent.text || "";
+            } catch (pdfError) {
+                console.error("PDF Parsing Error:", pdfError);
+                return res.status(400).json({
+                    message: "Failed to parse the uploaded PDF resume. Please make sure the file is not corrupted."
+                });
+            }
+        }
+
+        if (!resumeText.trim() && (!selfDescription || !selfDescription.trim())) {
+            return res.status(400).json({
+                message: "Either a resume file upload or a self description is required."
+            });
+        }
 
         const interViewReportByAi = await generateInterviewReport({
             resume: resumeText,
