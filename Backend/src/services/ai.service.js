@@ -59,23 +59,40 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 
 async function generatePdfFromHtml(htmlContent) {
     let browser;
-    try {
-        browser = await puppeteer.launch({
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
-        });
-    } catch (e) {
-        console.warn("Default Puppeteer launch failed. Attempting fallback to system Google Chrome...", e.message);
-        const fs = require("fs");
-        const systemChromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-        if (fs.existsSync(systemChromePath)) {
-            browser = await puppeteer.launch({
-                executablePath: systemChromePath,
-                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+        try {
+            const chromium = require("@sparticuz/chromium");
+            const puppeteerCore = require("puppeteer-core");
+            browser = await puppeteerCore.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: await chromium.executablePath(),
+                headless: chromium.headless,
             });
-        } else {
+        } catch (e) {
+            console.error("Failed to launch sparticuz-chromium on Render:", e);
             throw e;
         }
+    } else {
+        try {
+            browser = await puppeteer.launch({
+                args: ["--no-sandbox", "--disable-setuid-sandbox"]
+            });
+        } catch (e) {
+            console.warn("Default Puppeteer launch failed. Attempting fallback to system Google Chrome...", e.message);
+            const fs = require("fs");
+            const systemChromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+            if (fs.existsSync(systemChromePath)) {
+                browser = await puppeteer.launch({
+                    executablePath: systemChromePath,
+                    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+                });
+            } else {
+                throw e;
+            }
+        }
     }
+
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: "networkidle0" })
 
