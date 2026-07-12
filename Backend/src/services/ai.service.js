@@ -58,7 +58,19 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 
 
 async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch()
+    let browser;
+    try {
+        browser = await puppeteer.launch();
+    } catch (e) {
+        console.warn("Default Puppeteer launch failed. Attempting fallback to system Google Chrome...", e.message);
+        const fs = require("fs");
+        const systemChromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+        if (fs.existsSync(systemChromePath)) {
+            browser = await puppeteer.launch({ executablePath: systemChromePath });
+        } else {
+            throw e;
+        }
+    }
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: "networkidle0" })
 

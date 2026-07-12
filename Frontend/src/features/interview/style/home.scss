@@ -220,9 +220,23 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         background-color: rgba($accent, 0.05);
     }
 
+    &--selected {
+        border-color: #4caf50;
+        background-color: rgba(#4caf50, 0.05);
+
+        &:hover {
+            border-color: #4caf50;
+            background-color: rgba(#4caf50, 0.08);
+        }
+    }
+
     &__icon {
         color: $accent;
         margin-bottom: 0.25rem;
+
+        &--success {
+            color: #4caf50;
+        }
     }
 
     &__title {
