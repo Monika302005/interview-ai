@@ -61,13 +61,12 @@ async function generatePdfFromHtml(htmlContent) {
     let browser;
     if (process.env.NODE_ENV === "production" || process.env.RENDER) {
         try {
-            const chromium = require("@sparticuz/chromium");
+            const chromium = require("@sparticuz/chromium").default;
             const puppeteerCore = require("puppeteer-core");
             browser = await puppeteerCore.launch({
                 args: chromium.args,
-                defaultViewport: chromium.defaultViewport,
                 executablePath: await chromium.executablePath(),
-                headless: chromium.headless,
+                headless: true,
             });
         } catch (e) {
             console.error("Failed to launch sparticuz-chromium on Render:", e);
